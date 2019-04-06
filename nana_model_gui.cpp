@@ -9,7 +9,7 @@ class cModel;
 
 
 /// The GUI class interacts with the user
-class cGUI
+class cGUI : public nana::form
 {
 public:
     /** CTOR
@@ -17,12 +17,10 @@ public:
         @param[in] model reference to model we are providing user interface for
     */
     cGUI(
-        nana::form& parent,
         cModel& model );
 
 private:
     cModel& model;
-    nana::form& myParent;
     nana::slider sl;
     nana::combox cb;
     nana::label status;
@@ -114,13 +112,11 @@ private:
 };
 
 cGUI::cGUI(
-    nana::form& parent,
     cModel& m )
     : model( m )
-    , myParent( parent )
-    , sl( parent )
-    , cb( parent )
-    , status( parent )
+    , sl( *this )
+    , cb( *this )
+    , status( *this )
 {
     // locate the widgets
     move();
@@ -130,15 +126,17 @@ cGUI::cGUI(
     StartUpdateTimer();
 
     // handle application window resized
-    myParent.events().resized([this]
+    events().resized([this]
     {
         move();
     });
+
+    show();
 }
 void cGUI::move()
 {
     // evenly space the widgets along the height of the application window
-    int yinc = myParent.size().height / 4;
+    int yinc = size().height / 4;
     int y = yinc;
     sl.move( {20, y, 200, 25 });
     y += yinc;
@@ -185,16 +183,12 @@ void cGUI::OnTimer()
 }
 int main()
 {
-    // construct form for GUI
-    nana::form fm;
-
-    // construct applicartion model
+    // construct application model
     cModel model;
 
     // construct GUI for model
-    cGUI GUI( fm, model );
+    cGUI GUI( model );
 
     // off we go!
-    fm.show();
     nana::exec();
 }
